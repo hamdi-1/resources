@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bibliothèque Mathématique — Hamdi</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e0e0e;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --accent: #c8a96e;
+      --accent-dim: rgba(200, 169, 110, 0.12);
+      --text: #e8e2d9;
+      --text-muted: #7a7470;
+      --text-dim: #4a4540;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200,169,110,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,169,110,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 80px 32px 120px;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 80px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .breadcrumb {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb span { margin: 0 8px; color: var(--text-dim); }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .header-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .header-divider {
+      width: 48px;
+      height: 1px;
+      background: var(--accent);
+      margin: 28px 0;
+      opacity: 0.6;
+    }
+
+    /* Table of contents */
+    .toc {
+      margin-bottom: 72px;
+      padding: 24px 28px;
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--accent);
+      border-radius: 4px;
+      animation: fadeUp 0.8s 0.05s ease both;
+    }
+
+    .toc-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 24px;
+    }
+
+    .toc-list li a {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      letter-spacing: 0.04em;
+    }
+
+    .toc-list li a:hover { color: var(--accent); }
+
+    .toc-list li a::before {
+      content: attr(data-num) '  ';
+      color: var(--text-dim);
+    }
+
+    /* Category sections */
+    .category {
+      margin-bottom: 64px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .category:nth-child(1) { animation-delay: 0.10s; }
+    .category:nth-child(2) { animation-delay: 0.15s; }
+    .category:nth-child(3) { animation-delay: 0.20s; }
+    .category:nth-child(4) { animation-delay: 0.25s; }
+    .category:nth-child(5) { animation-delay: 0.30s; }
+    .category:nth-child(6) { animation-delay: 0.35s; }
+    .category:nth-child(7) { animation-delay: 0.40s; }
+    .category:nth-child(8) { animation-delay: 0.45s; }
+
+    .category-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .category-number {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 20px 18px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      border: 1px dashed var(--border);
+      border-radius: 4px;
+    }
+
+    /* Book entries */
+    .book-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .book-item {
+      position: relative;
+      padding: 14px 18px;
+      border-radius: 4px;
+      transition: background 0.2s;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .book-item:hover { background: var(--accent-dim); }
+
+    .book-bullet {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .book-content { flex: 1; }
+
+    .book-title {
+      color: var(--text);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .book-link {
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(200, 169, 110, 0.3);
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .book-link:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .book-author {
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(200,169,110,0.2);
+      padding: 2px 8px;
+      border-radius: 2px;
+      opacity: 0.8;
+    }
+
+    /* Favorites section special style */
+    .category.favorites .category-header {
+      border-bottom-color: rgba(200,169,110,0.35);
+    }
+
+    .category.favorites h2 {
+      color: var(--accent);
+    }
+
+    .category.favorites .book-item {
+      border-left: 2px solid transparent;
+      padding-left: 16px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .category.favorites .book-item:hover {
+      background: var(--accent-dim);
+      border-left-color: var(--accent);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 100px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      animation: fadeUp 0.8s 0.5s ease both;
+    }
+
+    .footer-note {
+      font-style: italic;
+      color: var(--text-dim);
+      font-family: 'EB Garamond', serif;
+      font-size: 14px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 48px 20px 80px; }
+      header { margin-bottom: 56px; }
+      .header-meta { flex-direction: column; gap: 8px; }
+      .toc-list { flex-direction: column; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">
+      <a href="#">~/hamdi</a>
+      <span>›</span>
+      <a href="#">ressources</a>
+      <span>›</span>
+      mathématiques
+    </div>
+
+    <h1><em>Bibliothèque</em><br>Mathématique</h1>
+
+    <div class="header-divider"></div>
+
+    <div class="header-meta">
+      <span>5 ouvrages</span>
+      <span>8 domaines</span>
+      <span>mise à jour : 25 avril 2026</span>
+    </div>
+  </header>
+
+  <!-- Table of contents -->
+  <nav class="toc">
+    <div class="toc-title">Sommaire</div>
+    <ul class="toc-list">
+      <li><a href="#analyse"      data-num="01">Analyse</a></li>
+      <li><a href="#algebre"      data-num="02">Algèbre</a></li>
+      <li><a href="#topologie"    data-num="03">Topologie</a></li>
+      <li><a href="#geometrie"    data-num="04">Géométrie</a></li>
+      <li><a href="#probabilites" data-num="05">Probabilités</a></li>
+      <li><a href="#arithmetique" data-num="06">Arithmétique</a></li>
+      <li><a href="#statistiques" data-num="07">Statistiques</a></li>
+      <li><a href="#favoris"      data-num="08">Favoris &amp; Généraux</a></li>
+    </ul>
+  </nav>
+
+  <!-- 01 ANALYSE -->
+  <section class="category" id="analyse">
+    <div class="category-header">
+      <span class="category-number">01</span>
+      <h2>Analyse</h2>
+    </div>
+    <ul class="book-list">
+      <li class="book-item">
+        <span class="book-bullet">—</span>
+        <div class="book-content">
+          <div class="book-title">
+            <a class="book-link" href="http://sebastien.pellerin.free.fr/fichiers/agreg/analyse.pdf" target="_blank">
+              Développements d'Analyse pour l'Oral de l'Agrégation
+            </a>
+          </div>
+          <div class="book-author">Sébastien Pellerin</div>
+          <div class="tags"><span class="tag">agrégation</span><span class="tag">oral</span></div>
+        </div>
+      </li>
+      <li class="book-item">
+        <span class="book-bullet">—</span>
+        <div class="book-content">
+          <div class="book-title">
+            <a class="book-link" href="https://perso.univ-rennes1.fr/san.vu-ngoc/docs/CD/calculdiff.pdf" target="_blank">
+              24h de Calcul Différentiel
+            </a>
+          </div>
+          <div class="book-author">San Vu Ngoc</div>
+          <div class="tags"><span class="tag">calcul différentiel</span></div>
+        </div>
+      </li>
+      <li class="book-item">
+        <span class="book-bullet">—</span>
+        <div class="book-content">
+          <div class="book-title">
+            <a class="book-link" href="https://archive.org/details/francois-rouviere-petit-guide-de-calcul-differentiel-a-lusage-de-la-licence-et-d/page/354/mode/1up" target="_blank">
+              Petit guide du calcul différentiel à l'usage de la licence et de l'agrégation
+            </a>
+          </div>
+          <div class="book-author">François Rouvière</div>
+          <div class="tags"><span class="tag">calcul différentiel</span><span class="tag">licence</span></div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- 02 ALGÈBRE -->
+  <section class="category" id="algebre">
+    <div class="category-header">
+      <span class="category-number">02</span>
+      <h2>Algèbre</h2>
+    </div>
+    <ul class="book-list">
+      <li class="book-item">
+        <span class="book-bullet">—</span>
+        <div class="book-content">
+          <div class="book-title">
+            <a class="book-link" href="https://webusers.imj-prg.fr/~gentiana.danila/Agrint/StagePro2020/GourdonAlgebre.pdf" target="_blank">
+              Algèbre
+            </a>
+          </div>
+          <div class="book-author">Xavier Gourdon</div>
+          <div class="tags"><span class="tag">algèbre</span><span class="tag">licence</span></div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- 03 TOPOLOGIE -->
+  <section class="category" id="topologie">
+    <div class="category-header">
+      <span class="category-number">03</span>
+      <h2>Topologie</h2>
+    </div>
+    <div class="empty-state">— à compléter —</div>
+  </section>
+
+  <!-- 04 GÉOMÉTRIE -->
+  <section class="category" id="geometrie">
+    <div class="category-header">
+      <span class="category-number">04</span>
+      <h2>Géométrie</h2>
+    </div>
+    <div class="empty-state">— à compléter —</div>
+  </section>
+
+  <!-- 05 PROBABILITÉS -->
+  <section class="category" id="probabilites">
+    <div class="category-header">
+      <span class="category-number">05</span>
+      <h2>Probabilités</h2>
+    </div>
+    <div class="empty-state">— à compléter —</div>
+  </section>
+
+  <!-- 06 ARITHMÉTIQUE -->
+  <section class="category" id="arithmetique">
+    <div class="category-header">
+      <span class="category-number">06</span>
+      <h2>Arithmétique</h2>
+    </div>
+    <div class="empty-state">— à compléter —</div>
+  </section>
+
+  <!-- 07 STATISTIQUES -->
+  <section class="category" id="statistiques">
+    <div class="category-header">
+      <span class="category-number">07</span>
+      <h2>Statistiques</h2>
+    </div>
+    <div class="empty-state">— à compléter —</div>
+  </section>
+
+  <!-- 08 FAVORIS & GÉNÉRAUX -->
+  <section class="category favorites" id="favoris">
+    <div class="category-header">
+      <span class="category-number">08</span>
+      <h2>Favoris &amp; Ouvrages généraux</h2>
+    </div>
+    <ul class="book-list">
+      <li class="book-item">
+        <span class="book-bullet">—</span>
+        <div class="book-content">
+          <div class="book-title">
+            <a class="book-link" href="https://webusers.imj-prg.fr/~pierre.colmez/livre.pdf" target="_blank">
+              Éléments d'analyse et d'algèbre (et de théorie des nombres)
+            </a>
+          </div>
+          <div class="book-author">Pierre Colmez</div>
+          <div class="tags">
+            <span class="tag">analyse</span>
+            <span class="tag">algèbre</span>
+            <span class="tag">théorie des nombres</span>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <footer>
+    <span class="footer-note">Archive personnelle de Hamdi — à compléter au fil du temps</span>
+    <span>~/hamdi/ressources/maths</span>
+  </footer>
+
+</div>
+</body>
+</html>
